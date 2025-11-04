@@ -1,0 +1,25 @@
+[Format]      =  4.0
+[Frequency]   =  0
+[Precision]   =  1e-008
+[MinAngle]    =  30
+[DoSmartMesh] =  1
+[Depth]       =  1
+[LengthUnits] =  inches
+[ProblemType] =  planar
+[Coordinates] =  cartesian
+[ACSolver]    =  0
+[PrevType]    =  0
+[PrevSoln]    =  ""
+[Comment]     =  "Add comments here."
+[PointProps]   = 0
+[BdryProps]   = 0
+[BlockProps]  = 0
+[CircuitProps]  = 0
+[NumPoints] = 3
+5.7000000000000002	3.8599999999999999	0	0
+7.8799999999999999	4.6900000000000004	0	0
+7.3700000000000001	2.27	0	0
+[NumSegments] = 0
+[NumArcSegments] = 0
+[NumHoles] = 0
+[NumBlockLabels] = 0
