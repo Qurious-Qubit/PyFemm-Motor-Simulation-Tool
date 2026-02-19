@@ -70,6 +70,60 @@ class Motor:
                 f"Expected path: {source_fem_file}"
             )
 
+
+
+'''
+    def create_operating_point(self, op_name, current, angle, speed=None):
+        """Create a subdirectory for a specific operating point"""
+        op_dir = self.operating_points_dir / op_name
+        op_dir.mkdir(exist_ok=True)
+        
+        # Save operating point parameters
+        op_config = {
+            'name': op_name,
+            'current': current,
+            'angle': angle,
+            'speed': speed if speed else (120 * self.frequency) / (2 * self.polepairs),
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # You can save this as JSON or any other format
+        config_file = op_dir / "config.json"
+        # json.dump(op_config, open(config_file, 'w'), indent=2)
+        
+        print(f"✓ Operating point created: {op_dir}")
+        return op_dir
+    
+    def get_simulation_paths(self):
+        """Return all important paths for easy access"""
+        return {
+            'base_path': self.base_path,
+            'femfiles_dir': self.femfiles_dir,
+            'simulations_dir': self.simulations_dir,
+            'simulation_dir': self.simulation_dir,
+            'femfile_copy_dir': self.femfile_copy_dir,
+            'operating_points_dir': self.operating_points_dir,
+            'fem_file_path': self.fem_file_path
+        }
+    
+    def display_structure(self):
+        """Display the directory structure"""
+        print("\n" + "="*50)
+        print("MOTOR SIMULATION DIRECTORY STRUCTURE")
+        print("="*50)
+        paths = self.get_simulation_paths()
+        for name, path in paths.items():
+            exists = "✓ EXISTS" if path.exists() else "⨯ MISSING"
+            print(f"{name:25} : {path} {exists}")
+
+
+def SimDC():
+
+    return 1
+
+'''
+       
+
 path = r"C:\D_Drive\Technical\GitHub\PyFemm-Motor-Simulation-Tool\test"
 femmfilename = "example"
 polepairs = 4
