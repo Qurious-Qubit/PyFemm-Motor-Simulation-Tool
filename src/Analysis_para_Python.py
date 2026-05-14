@@ -456,19 +456,22 @@ def assign_all_boundaries(D, Ds, Dr, tr_t, g, p, q, BM, filename):
     femm.opendocument(filename)
     
     # 1. Determine Periodicity for Lines vs. Air Gaps
-    # Lines: 4 = Periodic, 5 = Anti-Periodic
-    # Air Gaps (Sliding Bands): 6 = Periodic Air Gap, 7 = Anti-Periodic Air Gap
     is_anti_periodic = (int(BM[1]) % 2 != 0)
-    
     b_type = 5 if is_anti_periodic else 4 
     agap_type = 7 if is_anti_periodic else 6 
     
+    # --- THE FIX: Calculate the Boundary Sector Span Angles ---
+    theta_pole = 360 / p
+    slot_angle = 360 / q
+    
+    inner_angle_deg = int(BM[1]) * theta_pole  # e.g., 45 degrees
+    outer_angle_deg = int(BM[0]) * slot_angle  # e.g., 45 degrees
+    
     # 2. Define Boundary Properties in FEMM
-    # mi_addboundprop("Name", A0, A1, A2, Phi, Mu, Sig, ia, oa, BdryFormat)
     femm.mi_addboundprop("A=0", 0, 0, 0, 0, 0, 0, 0, 0, 0)
     
-    # FIXED: Use agap_type (6 or 7) for the Sliding Band!
-    femm.mi_addboundprop("AGap", 0, 0, 0, 0, 0, 0, 0, 0, agap_type) 
+    # CRITICAL: Pass inner and outer sector spans to the Periodic Air Gap!
+    femm.mi_addboundprop("AGap", 0, 0, 0, 0, 0, 0, inner_angle_deg, outer_angle_deg, agap_type) 
     
     for i in range(1, 5):
         femm.mi_addboundprop(f"r{i}", 0, 0, 0, 0, 0, 0, 0, 0, b_type)
@@ -486,11 +489,8 @@ def assign_all_boundaries(D, Ds, Dr, tr_t, g, p, q, BM, filename):
     stator_outer_radius = Ds / 2
     s_air = bore_radius - (g / 3)
     
-    theta_pole = 360 / p
-    slot_angle = 360 / q
-    
-    total_r_rad = math.radians(int(BM[1]) * theta_pole)
-    total_s_rad = math.radians(int(BM[0]) * slot_angle)
+    total_r_rad = math.radians(inner_angle_deg)
+    total_s_rad = math.radians(outer_angle_deg)
     
     # ---------------------------------------------------------
     # 4. Assign Rotor Boundaries
@@ -552,9 +552,8 @@ def assign_all_boundaries(D, Ds, Dr, tr_t, g, p, q, BM, filename):
     # ---------------------------------------------------------
     # 8. Assign AGap to the Rotor Airgap Arcs
     # ---------------------------------------------------------
-    total_angle_deg = int(BM[1]) * theta_pole
-    n_arc_chunks = math.ceil(total_angle_deg / 179.0) 
-    chunk_deg = total_angle_deg / n_arc_chunks
+    n_arc_chunks = math.ceil(inner_angle_deg / 179.0) 
+    chunk_deg = inner_angle_deg / n_arc_chunks
     
     for i in range(n_arc_chunks):
         start_rad = math.radians(i * chunk_deg)
@@ -574,6 +573,7 @@ def assign_all_boundaries(D, Ds, Dr, tr_t, g, p, q, BM, filename):
     
     print("All cyclic, outer, and AGap boundaries successfully assigned!")
     return 1
+
 
 # === ANALYSIS & SIMULATION FUNCTIONS ===
 # === PARALLEL WORKER FUNCTION ===
@@ -736,7 +736,7 @@ if __name__ == '__main__':
     # 48 slots / 8 poles = 6 teeth per pole. At 10 samples per tooth = 60 steps per pole.
     # We use 61 points to cover 0 to 180 exactly (inclusive).
     sim_theta_start = 0.0
-    sim_theta_end = 360.0/48.0*3.0
+    sim_theta_end = 360.0/48.0*3.0*4.0
     sim_num_steps = 61  
 
     print("\n" + "="*60)
@@ -784,6 +784,8 @@ if __name__ == '__main__':
         drawFullRotorIPM(Dr, current_tr_t, g, p, BM, pole_arc_elec_deg, magnet_thickness, magnet_width, rotor_iron_mat, magnet_mat, current_filename, 
                         mesh_agap=0.15, mesh_rotor_core=1.0, mesh_rib=0.10, mesh_magnet=0.5, mesh_shaft=5.0)
         
+        assign_all_boundaries(D, Ds, Dr, current_tr_t, g, p, q, BM, current_filename)
+
         print(f"[{current_tr_t} mm] Geometry generated successfully!")
 
         print(f"[{current_tr_t} mm] STEP 2: Running Cogging Torque Simulation...")
