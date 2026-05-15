@@ -633,7 +633,7 @@ def parallel_analyze_step(args):
         return None
     
 # === ANALYSIS & SIMULATION FUNCTIONS ===
-def run_motor_simulation(I_rms, gamma_elec_deg, Ns_rpm, p, BM, theta_start_elec, theta_end_elec, num_steps, filename, base_folder, band_name="AGap"):
+def run_motor_simulation(I_rms, gamma_elec_deg, initial_pos, Ns_rpm, p, BM, theta_start_elec, theta_end_elec, num_steps, filename, base_folder, band_name="AGap"):
     sim_folder_name = f"Sim_{I_rms}A_{gamma_elec_deg}deg_{num_steps}steps"
     full_sim_folder = os.path.join(base_folder, sim_folder_name)
     steps_folder = os.path.join(full_sim_folder, "steps")
@@ -658,7 +658,7 @@ def run_motor_simulation(I_rms, gamma_elec_deg, Ns_rpm, p, BM, theta_start_elec,
     tasks = []
     for step in range(num_steps):
         theta_elec = theta_start_elec + (step * step_size_elec)
-        theta_mech = theta_elec / (p / 2)
+        theta_mech = theta_elec / (p / 2) + initial_pos
         
         i_a = I_peak * math.cos(math.radians(theta_elec + gamma_elec_deg))
         i_b = I_peak * math.cos(math.radians(theta_elec - 120 + gamma_elec_deg))
@@ -791,7 +791,8 @@ if __name__ == '__main__':
         # 2. Execute Cogging Torque Simulation (0A, 0deg)
         cogging_results = run_motor_simulation(
             I_rms=0.0, 
-            gamma_elec_deg=0.0, 
+            gamma_elec_deg=0.0,
+            initial_pos = 3.75,
             Ns_rpm=Ns, 
             p=p, 
             BM=BM,
