@@ -259,7 +259,7 @@ def drawStator(D, Ds, q, hs0, hs1, d, bs0, bs1, bs2, wsy, BM, winding, Nt_c, fil
     return 1
 
 def drawFullRotorIPM(Dr, tr_t, g, p, BM, pole_arc_elec_deg, magnet_thickness, magnet_width, rotor_iron_mat, magnet_mat, filename, 
-                     mesh_agap=0.15, mesh_rotor_core=1.0, mesh_rotor_embedded_pole=0.75, mesh_rib=0.15, mesh_magnet=0.5, mesh_shaft=5.0):
+                     mesh_agap=0.15, mesh_rotor_core=1.0, mesh_rib=0.15, mesh_magnet=0.5, mesh_shaft=5.0):
     femm.openfemm()
     femm.opendocument(filename)
     
@@ -430,7 +430,7 @@ def drawFullRotorIPM(Dr, tr_t, g, p, BM, pole_arc_elec_deg, magnet_thickness, ma
         place_label(lbl_shaft_air[0], 0, "Air", mesh_shaft)
         place_label(lbl_inner_core[0], 0, rotor_iron_mat, mesh_rotor_core)
         place_label(lbl_central_air[0], 0, "Air", mesh_rotor_core) # Matches inner core depth
-        place_label(lbl_pole_core[0], 0, rotor_iron_mat, mesh_rotor_embedded_pole) # Matches magnet depth
+        place_label(lbl_pole_core[0], 0, rotor_iron_mat, mesh_rotor_core)
         place_label(lbl_rib_core[0], 0, rotor_iron_mat, mesh_rib)  # Highly dense rib mesh!
         
         place_label(ax_out, ay_out, "Air", mesh_rotor_core)
@@ -730,14 +730,14 @@ if __name__ == '__main__':
     magnet_mat = "N35"
 
     # Define Sweep Parameters
-    rib_thicknesses = [0.8]
+    rib_thicknesses = [0.8, 1.0, 1.2]
     master_sweep_folder = "Parametric_Rib_Sweep"
 
     # 48 slots / 8 poles = 6 teeth per pole. At 10 samples per tooth = 60 steps per pole.
     # We use 61 points to cover 0 to 180 exactly (inclusive).
     sim_theta_start = 0.0
-    sim_theta_end = 360.0/48.0*4.0 
-    sim_num_steps = 11  
+    sim_theta_end = 360.0/48.0*3.0*4.0
+    sim_num_steps = 61  
 
     print("\n" + "="*60)
     print("STARTING PARAMETRIC GEOMETRY & SIMULATION SWEEP")
@@ -779,9 +779,10 @@ if __name__ == '__main__':
 
         # Example explicitly overriding them for a highly precise study:
         drawStator(D, Ds, q, hs0, hs1, d, bs0, bs1, bs2, wsy, BM, winding, Nt_c, current_filename, 
-                mesh_agap=0.1, mesh_stator=0.75, mesh_coil=1.5)               
+                mesh_agap=0.15, mesh_stator=1.0, mesh_coil=2.0)
+                
         drawFullRotorIPM(Dr, current_tr_t, g, p, BM, pole_arc_elec_deg, magnet_thickness, magnet_width, rotor_iron_mat, magnet_mat, current_filename, 
-                        mesh_agap=0.1, mesh_rotor_core=0.75, mesh_rotor_embedded_pole=0.1, mesh_rib=0.10, mesh_magnet=0.3, mesh_shaft=5.0)
+                        mesh_agap=0.15, mesh_rotor_core=1.0, mesh_rib=0.10, mesh_magnet=0.5, mesh_shaft=5.0)
         
         assign_all_boundaries(D, Ds, Dr, current_tr_t, g, p, q, BM, current_filename)
 
